@@ -1,3 +1,23 @@
+UserProfileMgr
+
+UserProfileMgr is a user profile management microservice that provides functionality for managing user profiles within an application or system. The project is built using Java and the Spring Boot framework, and it utilizes a MySQL database for storing user data.
+Technologies Used
+
+    Java
+    Spring Boot
+    MySQL
+
+Installation
+
+Before running the application, you must have Docker and IntelliJ installed on your machine. Here are the steps to install and run the application:
+
+    Clone the repository: git clone https://github.com/[username]/UserProfileMgr.git
+    Navigate to the project directory: cd UserProfileMgr
+    Run the Docker Compose file to start the MySQL container: docker-compose up
+    Open the project in IntelliJ and run the UserProfileMgrApplication class
+
+
+
 API Endpoints
 
 Here are the available endpoints for accessing the application's functionality:
