@@ -2,6 +2,9 @@ package com.example.UserProfileManager3.entity;
 
 
 import jakarta.persistence.*;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.Email;
 
 
 @Entity
@@ -19,6 +22,7 @@ public class User {
     private String lastName;
     @Column(nullable = false, unique = true)
 
+    @Email(message = "Please provide a valid email address",regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     private String email;
     @Column(nullable = false)
 

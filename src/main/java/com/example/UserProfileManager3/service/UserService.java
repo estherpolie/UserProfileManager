@@ -2,6 +2,7 @@ package com.example.UserProfileManager3.service;
 
 import com.example.UserProfileManager3.Exception.NotFoundException;
 import com.example.UserProfileManager3.entity.User;
+import com.example.UserProfileManager3.filter.JwtUtil;
 import com.example.UserProfileManager3.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +27,7 @@ public class UserService {
         this.bCryptPasswordEncoder=bCryptPasswordEncoder;
     }
 
-    public User save(User user) {
+    public User save(@Valid User user) {
 //        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));//save as hash
         //        user.setPassword(passwordEncoder.encode(user .getPassword()));
 //        PasswordEncoder passwordEncoder = new MessageDigestPasswordEncoder("SHA-256");
@@ -86,7 +88,9 @@ public class UserService {
         if (!user.getPassword().equals(users.getPassword())) {
             throw new RuntimeException("Incorrect password");
         }
-        return "logged in successfully";
+        String jwt = JwtUtil.generateToken(users.getEmail());
+
+        return jwt;
 }
 
 

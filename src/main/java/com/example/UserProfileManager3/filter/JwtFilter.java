@@ -50,13 +50,13 @@ public class JwtFilter implements Filter, HandlerInterceptor {
         try {
             String jwt = token.substring(7);
 
-            Claims claims = jwtUtil.validateToken(jwt);
+            Claims claims = jwtUtil.validateToken(jwt);//checking if they are valid
             if (claims == null) {
                 res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
 
-            // You can add the authenticated user object to the request object for further use
+            //  adding the authenticated user object to the request object for  use
 //            req.setAttribute("userId", claims.getBody().get("id"));
         } catch (JwtException e) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

@@ -7,6 +7,8 @@ import com.example.UserProfileManager3.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
@@ -26,6 +29,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService userService)
     {
@@ -34,14 +38,17 @@ public class UserController {
 
 
     @PostMapping("/api/users/signup/")
-    public ResponseEntity<Object> createUser(@RequestBody User user) {
+    public ResponseEntity<Object> createUser(@Valid @RequestBody User user) {
 
             if (userService.findUserByEmail(user.getEmail()).isPresent()) {
+                logger.info("user email exist ");
             return new ResponseEntity<>("User email exist  ", HttpStatus.NOT_FOUND);
         }
         else {
             userService.save(user);
-            return new ResponseEntity<>(userService.save(user), HttpStatus.OK);
+                logger.info("user  saved successfully =>{}",user);
+
+                return new ResponseEntity<>(userService.save(user), HttpStatus.OK);
         }
     }
 
@@ -51,32 +58,21 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
         }
-   //     String secretKey = "mySecretKey";
-//
-//        // Create a JWT using the builder pattern
-//        String jwt = Jwts.builder().claim("id",user.getId())
-//                .signWith(SignatureAlgorithm.HS256, secretKey) // Sign the JWT with the secret key
-//                .compact(); // Compact the JWT into a string
 
-//       Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-//
-//
-//        String token = Jwts.builder().claim("id",user.getId())
-//                .signWith(key)
-//                .compact();
-        String jwt = JwtUtil.generateToken(users.getEmail());
 
         if (!users.getPassword().equals(user.getPassword())) {
             return new ResponseEntity<>("Incorrect password", HttpStatus.UNAUTHORIZED);
         }
 
-
-        return new ResponseEntity<>(jwt, HttpStatus.OK);
+        logger.info("user  logged in successfully =>{}",users);
+        return new ResponseEntity<>(userService.loginUser(users), HttpStatus.OK);
     }
 
 
     @GetMapping("/api/users/signup/all")
     public List<User> getAllUser( User user) {
+        logger.info("users  retrieved successfully =>{}",userService.getAllUsers());
+
         return userService.getAllUsers();
     }
 
@@ -84,13 +80,26 @@ public class UserController {
     @GetMapping("api/users/{id}")//FIND user by id
     public Optional<User> userId (@PathVariable Long id)
     {
+        logger.info("user  retrieved successfully =>{}",userService.findById(id));
+
         return userService.findById(id);
     }
 
     @DeleteMapping("api/{id}")//delete by userId
-    public String deleteUser(@PathVariable Long id) {
-        userService.deleteUserById(id);
-        return "deleted successfully";
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+
+        Optional<User> user = userService.findById(id);
+        if (user.isPresent()) {
+            userService.deleteUserById(id);
+            return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+            // User exists
+        } else {
+            // User does not exist
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+
+        }
+
+
     }
 
     @PutMapping("api/1/{id}")//update user by id
@@ -104,7 +113,7 @@ public class UserController {
             existingUser.setPassword(user.getPassword());
             existingUser.setEmail(user.getEmail());
             User updatedUser = userService.save(existingUser);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+            return new ResponseEntity<>(userService.updateUserById(id,updatedUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); //if user id doesnt exist (404 not found)
         }
